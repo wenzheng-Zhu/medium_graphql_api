@@ -7,8 +7,8 @@ defmodule MediumGraphqlApi.Accounts.User do
     field :first_name, :string
     field :last_name, :string
     field :password_hash, :string
-    field :password, :string, vitual: true
-    field :password_confirmation, :string, vitual: true
+    field(:password, :string, virtual: true)
+    field(:password_confirmation, :string, virtual: true)
     field :role, :string, default: "user"
 
     timestamps()
@@ -25,6 +25,10 @@ defmodule MediumGraphqlApi.Accounts.User do
     |> validate_confirmation(:password)
     |> unique_constraint(:email)
     |> hash_password
+  end
+
+  defp hash_password(%Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset) do
+    change(changeset, Argon2.add_hash(password))
   end
 
   defp hash_password(changeset) do
